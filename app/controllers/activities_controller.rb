@@ -18,15 +18,20 @@ class ActivitiesController < ApplicationController
   
     def create
       @activity = current_user.activities.build(activity_params)
-  
+    
+      authorize_activity(@activity) 
+    
       if @activity.save
         render json: @activity, status: :created
       else
         render json: { errors: @activity.errors.full_messages }, status: :unprocessable_entity
       end
     end
+    
   
     def update
+      authorize_activity(@activity) 
+  
       if @activity.update(activity_params)
         render json: @activity, status: :ok
       else
@@ -36,9 +41,12 @@ class ActivitiesController < ApplicationController
   
 
     def destroy
+      authorize_activity(@activity) 
+  
       @activity.destroy
       head :no_content
     end
+  
   
     private
   
@@ -53,6 +61,13 @@ class ActivitiesController < ApplicationController
         flash[:error] = 'You must be logged in to access this section'
         redirect_to authentication
       end
+
+      def authorize_activity(activity)
+        if current_user != activity.user
+          render json: { error: 'You are not authorized to perform this action' }, status: :unauthorized
+        end
+      end
+      
       
     end
   
