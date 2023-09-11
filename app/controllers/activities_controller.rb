@@ -2,12 +2,15 @@ class ActivitiesController < ApplicationController
     before_action :authenticate_user
     before_action :set_activity, only: [:show, :update, :destroy]
     
-  
     def index
-      @activities = current_user.activities
-      render json: @activities, status: :ok
+      if current_user
+        @activities = current_user.activities
+        render json: @activities, status: :ok
+      else
+        render json: { error: 'Unauthorized' }, status: :unauthorized
+      end
     end
-  
+    
  
     def show
       render json: @activity, status: :ok
